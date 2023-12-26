@@ -1,15 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 function Messages() {
     const [messages, setMessages] = useState([]);
+    const [text, setText] = useState("");
 
     useEffect(() => {
-        fetch('http://localhost:3000/messages')
-            .then(response => response.json())
-            .then(data => setMessages(data))
-            .catch(error => console.error('Error fetching messages:', error));
+        async function fetchData() {
+            const response = await getMessages()
+            setMessages(response)
+        }
+        fetchData();
     }, []);
+
+    const getMessages = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/messages')
+            return response.json()
+
+        } catch (error) {
+            console.error('Error fetching messages:', error)
+            return error
+        }
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+
+        try {
+            const response = await fetch('http://localhost:3000/messages', {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content: text })
+            })
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const messages = await getMessages()
+            setText("")
+            setMessages(messages)
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }
+
 
     return (
         <div className="messages-container">
@@ -26,6 +61,10 @@ function Messages() {
             ) : (
                 <p>No messages available.</p>
             )}
+            <form>
+                <input type="text" value={text} onChange={(e) => setText(e.target.value)}></input>
+                <input type="submit" onClick={handleSubmit}></input>
+            </form>
         </div>
     );
 }
