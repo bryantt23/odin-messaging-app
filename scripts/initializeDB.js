@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const User = require('./models/User'); // Assuming you have a User model defined as previously discussed
-const Message = require('./models/Message'); // Assuming you have a Message model defined as previously discussed
+const User = require('../models/User'); // Assuming you have a User model defined as previously discussed
+const Message = require('../models/Message'); // Assuming you have a Message model defined as previously discussed
 require('dotenv').config();
 
 mongoose
