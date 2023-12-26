@@ -18,7 +18,7 @@ function Messages() {
                 <ul className="message-list">
                     {messages.map(message => (
                         <li key={message._id} className="message-item">
-                            <h3 className="message-title">{message.userId}</h3>
+                            <h3 className="message-title">{message.username}</h3>
                             <p className="message-body">{message.content}</p>
                         </li>
                     ))}
