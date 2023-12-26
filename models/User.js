@@ -8,7 +8,6 @@ const userSchema = new Schema({
     trim: true
   },
   password: {
-    // Store hashed passwords onlyc:\Users\bryan\Documents\GitHub\odin-blog-api\createUserScript.js
     type: String,
     required: true
   }
