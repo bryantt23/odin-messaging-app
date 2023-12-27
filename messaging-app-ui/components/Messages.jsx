@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import socketIOClient from 'socket.io-client'
+import './Messages.css'
 
 const ENDPOINT = 'http://localhost:3000/'
 
 function Messages() {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
+    const messagesEndRef = useRef(null)
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
+
+    useEffect(() => {
+        scrollToBottom()
+    }, [messages])
 
     useEffect(() => {
         async function fetchData() {
@@ -18,6 +28,7 @@ function Messages() {
         // Listen for new messages
         socket.on("newMessage", (newMessage) => {
             setMessages((prevMessages) => [...prevMessages, newMessage])
+
         })
 
         return () => socket.disconnect()
@@ -56,7 +67,7 @@ function Messages() {
 
     return (
         <div className="messages-container">
-            <h2 className="messages-title">All Messages</h2>
+            <h2 className="sticky-header messages-title">All Messages</h2>
             {messages.length > 0 ? (
                 <ul className="message-list">
                     {messages.map(message => (
@@ -65,6 +76,8 @@ function Messages() {
                             <p className="message-body">{message.content}</p>
                         </li>
                     ))}
+                    {/* Invisible element for scrolling */}
+                    <div ref={messagesEndRef} />
                 </ul>
             ) : (
                 <p>No messages available.</p>
