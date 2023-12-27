@@ -5,6 +5,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const Message = require('./models/Message');
 const User = require('./models/User');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 require('dotenv').config();
 // MongoDB Connection
@@ -82,12 +84,33 @@ app.post('/messages', async (req, res) => {
   }
 });
 
+//user login route
+app.post('/login', async (req, res) => {
+  const { name, password } = req.body;
+
+  // Find user by name
+  const user = await User.findOne({ name });
+  if (!user) {
+    return res.status(401).send('Authentication failed');
+  }
+
+  // Check if password is correct
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return res.status(401).send('Authentication failed');
+  }
+
+  // Generate and return JWT
+  const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY);
+  res.json({ token });
+});
 /*
 TODO
 requirements - group chat
 ui shows chat
 if user is not logged in then have a link that says "register or log in to join the chat" otherwise show the chat form
 have register & login pages, both redirect to chat
+make sure the chat shows the correct poster of the new message
 have a log out 
 have the header say home, login/register or logout
 
