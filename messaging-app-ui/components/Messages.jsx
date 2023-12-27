@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import socketIOClient from 'socket.io-client'
+
+const ENDPOINT = 'http://localhost:3000/'
 
 function Messages() {
     const [messages, setMessages] = useState([]);
@@ -10,11 +13,19 @@ function Messages() {
             setMessages(response)
         }
         fetchData();
+        // Establish WebSocket connection
+        const socket = socketIOClient(ENDPOINT)
+        // Listen for new messages
+        socket.on("newMessage", (newMessage) => {
+            setMessages((prevMessages) => [...prevMessages, newMessage])
+        })
+
+        return () => socket.disconnect()
     }, []);
 
     const getMessages = async () => {
         try {
-            const response = await fetch('http://localhost:3000/messages')
+            const response = await fetch(ENDPOINT + 'messages')
             return response.json()
 
         } catch (error) {
@@ -27,7 +38,7 @@ function Messages() {
         e.preventDefault()
 
         try {
-            const response = await fetch('http://localhost:3000/messages', {
+            const response = await fetch(ENDPOINT + 'messages', {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,14 +48,11 @@ function Messages() {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            const messages = await getMessages()
             setText("")
-            setMessages(messages)
         } catch (error) {
             console.error('Error sending message:', error);
         }
     }
-
 
     return (
         <div className="messages-container">

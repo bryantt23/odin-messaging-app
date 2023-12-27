@@ -13,12 +13,21 @@ mongoose
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 
+const corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200
+};
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
 
 io.on('connection', socket => {
   console.log('A user connected');
@@ -49,6 +58,7 @@ app.get('/messages', async (req, res) => {
 
 app.post('/messages', async (req, res) => {
   try {
+    // TODO use logged in user
     const anonymousUser = await User.findOne({ name: 'anonymous' });
 
     if (!anonymousUser) {
@@ -61,6 +71,10 @@ app.post('/messages', async (req, res) => {
     });
 
     await newMessage.save();
+    const messageObject = newMessage.toObject();
+    // Emit the new message to all connected clients
+    io.emit('newMessage', { ...messageObject, username: 'anonymous' });
+
     res.status(201).json(newMessage);
   } catch (error) {
     console.error('Error posting message:', error);
