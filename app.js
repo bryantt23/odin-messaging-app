@@ -82,5 +82,28 @@ app.post('/messages', async (req, res) => {
   }
 });
 
+/*
+TODO
+requirements - group chat
+ui shows chat
+if user is not logged in then have a link that says "register or log in to join the chat" otherwise show the chat form
+have register & login pages, both redirect to chat
+have a log out 
+have the header say home, login/register or logout
+
+add login api & page
+register api & page
+
+requirements - individual chat
+group chat shows all of the users
+  all are hyper links except for the logged in
+  if not logged in none are hyperlinks
+
+hyperlink leads to chat with the two
+how to structure the message?
+i am thinking it needs an id which is either group or has the 2 people, i will research 
+this page will have a go back to group chat
+*/
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
