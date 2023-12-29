@@ -1,8 +1,16 @@
 .sticky-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 50px; /* Below the main header */
+  width: 100%; /* Ensure it spans the full width of the viewport */
   background: white;
-  z-index: 1000;
-  padding: 10px;
+  z-index: 1000; /* Make sure it's above other content */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 50px;
+  display: flex;
+  align-items: center;
+  /* Other styling as required */
+}
+
+.main-content {
+  padding-top: 100px; /* Adjust as per the total height of both headers */
 }

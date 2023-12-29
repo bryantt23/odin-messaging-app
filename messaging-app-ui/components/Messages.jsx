@@ -68,24 +68,27 @@ function Messages() {
     return (
         <div className="messages-container">
             <h2 className="sticky-header messages-title">All Messages</h2>
-            {messages.length > 0 ? (
-                <ul className="message-list">
-                    {messages.map(message => (
-                        <li key={message._id} className="message-item">
-                            <h3 className="message-title">{message.username}</h3>
-                            <p className="message-body">{message.content}</p>
-                        </li>
-                    ))}
-                    {/* Invisible element for scrolling */}
-                    <div ref={messagesEndRef} />
-                </ul>
-            ) : (
-                <p>No messages available.</p>
-            )}
-            <form>
-                <input type="text" value={text} onChange={(e) => setText(e.target.value)}></input>
-                <input type="submit" onClick={handleSubmit}></input>
-            </form>
+            <div className="main-content">
+
+                {messages.length > 0 ? (
+                    <ul className="message-list">
+                        {messages.map(message => (
+                            <li key={message._id} className="message-item">
+                                <h3 className="message-title">{message.username}</h3>
+                                <p className="message-body">{message.content}</p>
+                            </li>
+                        ))}
+                        {/* Invisible element for scrolling */}
+                        <div ref={messagesEndRef} />
+                    </ul>
+                ) : (
+                    <p>No messages available.</p>
+                )}
+                <form>
+                    <input type="text" value={text} onChange={(e) => setText(e.target.value)}></input>
+                    <input type="submit" onClick={handleSubmit}></input>
+                </form>
+            </div>
         </div>
     );
 }
