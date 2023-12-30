@@ -75,16 +75,12 @@ app.get('/messages', async (req, res) => {
   try {
     // Extract query parameters
     const { user, userName } = req.query;
-
     let query = {};
 
     // If user and userName are provided, adjust the query to fetch specific messages
     if (user && userName) {
-      // Find user IDs based on names
-      const users = await User.find({
-        name: { $in: [user, userName] }
-      });
-
+      // Logic for fetching private messages between two specific users
+      const users = await User.find({ name: { $in: [user, userName] } });
       const userIds = users.map(u => u._id);
 
       if (userIds.length === 2) {
@@ -99,6 +95,9 @@ app.get('/messages', async (req, res) => {
         // If both users are not found, return an empty array
         return res.json([]);
       }
+    } else {
+      // Logic for fetching group messages (where recipientId is null)
+      query = { recipientId: null };
     }
 
     const messages = await Message.find(query)
