@@ -29,7 +29,6 @@ function Messages({ token }) {
         // Listen for new messages
         socket.on("newMessage", (newMessage) => {
             setMessages((prevMessages) => [...prevMessages, newMessage])
-
         })
 
         return () => socket.disconnect()
@@ -54,6 +53,7 @@ function Messages({ token }) {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ content: text })
             })
@@ -67,9 +67,9 @@ function Messages({ token }) {
     }
 
     const form = token ? (
-        <form>
+        <form onSubmit={handleSubmit}>
             <input type="text" value={text} onChange={(e) => setText(e.target.value)}></input>
-            <input type="submit" onClick={handleSubmit}></input>
+            <button type="submit">Send</button>
         </form>
     ) : (
         <p>You must <Link to="/login">Login</Link> to chat</p>

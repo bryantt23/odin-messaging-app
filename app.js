@@ -60,22 +60,30 @@ app.get('/messages', async (req, res) => {
 
 app.post('/messages', async (req, res) => {
   try {
-    // TODO use logged in user
-    const anonymousUser = await User.findOne({ name: 'anonymous' });
+    // Extract the token from the Authorization header
+    const token = req.headers.authorization.split(' ')[1];
 
-    if (!anonymousUser) {
-      return res.status(404).send('Anonymous user not found');
+    // Verify and decode the token
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+
+    // Extract username from the decoded token
+    const userId = decoded.userId;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).send('User not found');
     }
-    // Create a new message with the anonymous user as the author
+    // Create a new message with the user as the author
     const newMessage = new Message({
-      userId: anonymousUser._id,
+      userId: user._id,
       content: req.body.content // Assuming the message content is sent in the request body
     });
 
     await newMessage.save();
     const messageObject = newMessage.toObject();
     // Emit the new message to all connected clients
-    io.emit('newMessage', { ...messageObject, username: 'anonymous' });
+    io.emit('newMessage', { ...messageObject, username: user.name });
 
     res.status(201).json(newMessage);
   } catch (error) {
