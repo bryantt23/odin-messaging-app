@@ -32,20 +32,17 @@ const io = socketIo(server, {
 });
 
 io.on('connection', socket => {
-  console.log('A user connected');
   // Join the user to the group chat room
   socket.join('groupChatRoom');
 
   // Join the user to a room with their username
   socket.on('joinPrivateRoom', ({ username }) => {
-    console.log(`User joined private room: ${username}`);
     socket.join(username);
   });
 
   // Handle group chat messages
   socket.on('groupMessage', message => {
     // Save message to database if needed
-    console.log('Group message received:', message);
     io.to('groupChatRoom').emit('newGroupMessage', message);
   });
 
@@ -54,13 +51,6 @@ io.on('connection', socket => {
     // Save the message to the database, similar to your POST /messages route logic
     // Emit the message to the recipient's room
     const privateMessage = { content, sender, recipient };
-    console.log(
-      '🚀 ~ file: app.js:58 ~ socket.on ~ content, sender, recipient :',
-      content,
-      sender,
-      recipient
-    );
-
     io.to(recipient).emit('newPrivateMessage', privateMessage);
     // Emit to the sender
     io.to(sender).emit('newPrivateMessage', privateMessage);
@@ -201,30 +191,6 @@ app.post('/login', async (req, res) => {
   );
   res.json({ token });
 });
-/*
-TODO
-requirements - 
-x group chat 
-x ui shows chat 
-x if user is not logged in then have a link that says "register or log in to join the chat" otherwise show the chat form
-x have register & login pages, both redirect to chat
-x make sure the chat shows the correct poster of the new message
-x have a log out 
-x have the header say home, login/register or logout
-
-x add login api & page
-x register api & page
-
-requirements - individual chat
-group chat shows all of the users
-  all are hyper links except for the logged in
-  if not logged in none are hyperlinks
-
-hyperlink leads to chat with the two
-how to structure the message?
-i am thinking it needs an id which is either group or has the 2 people, i will research 
-this page will have a go back to group chat
-*/
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

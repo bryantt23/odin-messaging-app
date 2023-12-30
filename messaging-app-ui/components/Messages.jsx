@@ -28,7 +28,6 @@ function Messages({ token, userName }) {
         const socket = socketIOClient(ENDPOINT)
         // Listen for new messages
         socket.on("newGroupMessage", (newMessage) => {
-            console.log("New group message received:", newMessage);
             setMessages((prevMessages) => [...prevMessages, newMessage])
         })
 

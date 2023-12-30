@@ -26,17 +26,14 @@ function ChatComponent({ token, userName }) {
 
         // Join the room with the current username
         socket.emit("joinPrivateRoom", { username: userName })
-        console.log(`Joined private room for: ${userName}`);
 
         // Listen for new private messages
         socket.on("newPrivateMessage", (message) => {
-            console.log("🚀 ~ file: ChatComponent.jsx:33 ~ socket.on ~ message:", message)
             const formattedMessage = {
                 content: message.content,
                 // Assuming the server sends the sender's username as 'sender'
                 username: message.sender
             };
-            console.log("🚀 ~ file: ChatComponent.jsx:39 ~ socket.on ~ formattedMessage:", formattedMessage)
             if (formattedMessage.username) {
                 setMessages((prevMessages) => [...prevMessages, formattedMessage]);
             }
