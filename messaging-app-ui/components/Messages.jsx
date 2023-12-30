@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import socketIOClient from 'socket.io-client'
 import './Messages.css'
 import { Link } from 'react-router-dom';
+import fetchMessages from './utils';
 
 const ENDPOINT = 'http://localhost:3000/'
 
@@ -20,8 +21,7 @@ function Messages({ token, userName }) {
 
     useEffect(() => {
         async function fetchData() {
-            const response = await getMessages()
-            setMessages(response)
+            fetchMessages(ENDPOINT).then(data => setMessages(data));
         }
         fetchData();
         // Establish WebSocket connection
@@ -34,16 +34,6 @@ function Messages({ token, userName }) {
         return () => socket.disconnect()
     }, []);
 
-    const getMessages = async () => {
-        try {
-            const response = await fetch(ENDPOINT + 'messages')
-            return response.json()
-
-        } catch (error) {
-            console.error('Error fetching messages:', error)
-            return error
-        }
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()

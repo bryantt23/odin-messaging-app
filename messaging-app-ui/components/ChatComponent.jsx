@@ -3,6 +3,7 @@ import socketIOClient from 'socket.io-client'
 import './ChatComponent.css'
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
+import fetchMessages from './utils';
 
 const ENDPOINT = 'http://localhost:3000/'
 
@@ -44,14 +45,7 @@ function ChatComponent({ token, userName }) {
 
     useEffect(() => {
         if (userName) {
-            async function fetchData() {
-                const query = new URLSearchParams({ userName, user }).toString();
-                const url = `${ENDPOINT}messages?${query}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                setMessages(data);
-            }
-            fetchData();
+            fetchMessages(ENDPOINT, { userName, user }).then(data => setMessages(data));
         }
     }, [userName, user]);
 
