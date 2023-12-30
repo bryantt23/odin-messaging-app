@@ -25,7 +25,7 @@ function App() {
     <Router>
       <Header token={token} setToken={setToken} />
       <Routes>
-        <Route path="/" element={<Messages />} />
+        <Route path="/" element={<Messages token={token} />} />
         <Route path="/login" element={<Login setToken={setToken} />} />
       </Routes>
     </Router>

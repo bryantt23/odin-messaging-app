@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import socketIOClient from 'socket.io-client'
 import './Messages.css'
+import { Link } from 'react-router-dom';
 
 const ENDPOINT = 'http://localhost:3000/'
 
-function Messages() {
+function Messages({ token }) {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const messagesEndRef = useRef(null)
@@ -65,6 +66,15 @@ function Messages() {
         }
     }
 
+    const form = token ? (
+        <form>
+            <input type="text" value={text} onChange={(e) => setText(e.target.value)}></input>
+            <input type="submit" onClick={handleSubmit}></input>
+        </form>
+    ) : (
+        <p>You must <Link to="/login">Login</Link> to chat</p>
+    );
+
     return (
         <div className="messages-container">
             <h2 className="sticky-header messages-title">All Messages</h2>
@@ -84,10 +94,7 @@ function Messages() {
                 ) : (
                     <p>No messages available.</p>
                 )}
-                <form>
-                    <input type="text" value={text} onChange={(e) => setText(e.target.value)}></input>
-                    <input type="submit" onClick={handleSubmit}></input>
-                </form>
+                {form}
             </div>
         </div>
     );
