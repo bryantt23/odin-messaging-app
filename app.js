@@ -161,6 +161,7 @@ app.post('/messages', async (req, res) => {
     // Check if it's a group message or a private message
     if (!recipientId) {
       // Group message: Emit to group chat room
+      messageObject.username = user.name;
       io.to('groupChatRoom').emit('newGroupMessage', messageObject);
     } else {
       // Private message: Emit to both the sender and recipient
