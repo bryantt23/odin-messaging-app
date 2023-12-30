@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 
-function Header({ token, setToken }) {
+function Header({ token, setToken, userName }) {
     const signOut = () => {
         localStorage.removeItem('jwt');
         setToken(null); // Update the token state to null on sign out
@@ -21,6 +21,7 @@ function Header({ token, setToken }) {
                 <ul className="nav-list">
                     <li className="nav-item"><Link to="/">Home</Link></li>
                     <li className="nav-item">{renderButton}</li>
+                    {userName && `Welcome ${userName}`}
                 </ul>
             </nav>
         </header>
