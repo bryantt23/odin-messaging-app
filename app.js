@@ -34,22 +34,67 @@ const io = socketIo(server, {
 io.on('connection', socket => {
   console.log('A user connected');
 
+  // Join the user to a room with their username
+  socket.on('joinRoom', ({ username }) => {
+    socket.join(username);
+  });
+
+  // Handle private messages
+  socket.on('privateMessage', ({ content, sender, recipient }) => {
+    // Save the message to the database, similar to your POST /messages route logic
+    // Emit the message to the recipient's room
+    io.to(recipient).emit('newPrivateMessage', {
+      content,
+      sender,
+      recipient
+    });
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
 });
 
-// GET route to fetch messages
 app.get('/messages', async (req, res) => {
   try {
-    const messages = await Message.find({})
+    // Extract query parameters
+    const { user, userName } = req.query;
+
+    let query = {};
+
+    // If user and userName are provided, adjust the query to fetch specific messages
+    if (user && userName) {
+      // Find user IDs based on names
+      const users = await User.find({
+        name: { $in: [user, userName] }
+      });
+
+      const userIds = users.map(u => u._id);
+
+      if (userIds.length === 2) {
+        // Construct query to fetch messages between the two users
+        query = {
+          $or: [
+            { userId: userIds[0], recipientId: userIds[1] },
+            { userId: userIds[1], recipientId: userIds[0] }
+          ]
+        };
+      } else {
+        // If both users are not found, return an empty array
+        return res.json([]);
+      }
+    }
+
+    const messages = await Message.find(query)
       .sort({ createdAt: 1 })
-      .populate('userId', 'name'); // Populate name field from User model
+      .populate('userId', 'name')
+      .populate('recipientId', 'name');
 
     res.json(
       messages.map(message => ({
         ...message.toObject(),
-        username: message.userId.name // Assuming 'name' is a field in User model
+        username: message.userId.name,
+        recipientName: message.recipientId ? message.recipientId.name : null
       }))
     );
   } catch (error) {
@@ -66,6 +111,19 @@ app.post('/messages', async (req, res) => {
     // Verify and decode the token
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
+    let recipientId = null;
+
+    // Check if recipientUsername is provided
+    if (req.body.recipientUsername) {
+      const recipient = await User.findOne({
+        name: req.body.recipientUsername
+      });
+      if (!recipient) {
+        return res.status(404).send('Recipient user not found');
+      }
+      recipientId = recipient._id;
+    }
+
     // Extract username from the decoded token
     const userId = decoded.userId;
 
@@ -77,6 +135,7 @@ app.post('/messages', async (req, res) => {
     // Create a new message with the user as the author
     const newMessage = new Message({
       userId: user._id,
+      recipientId, // This will be null for group messages
       content: req.body.content // Assuming the message content is sent in the request body
     });
 

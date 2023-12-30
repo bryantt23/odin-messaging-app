@@ -8,6 +8,11 @@ const messageSchema = new Schema({
     ref: 'User',
     required: true
   },
+  recipientId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    default: null // Explicitly set to null when not used
+  },
   content: {
     type: String,
     required: true

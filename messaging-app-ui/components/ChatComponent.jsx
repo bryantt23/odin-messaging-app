@@ -1,14 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import socketIOClient from 'socket.io-client'
-import './Messages.css'
+import './ChatComponent.css'
 import { Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const ENDPOINT = 'http://localhost:3000/'
 
-function Messages({ token, userName }) {
+function ChatComponent({ token, userName }) {
+    console.log("🚀 ~ file: ChatComponent.jsx:10 ~ ChatComponent ~ userName:", userName)
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const messagesEndRef = useRef(null)
+    const { user } = useParams()
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -19,34 +22,45 @@ function Messages({ token, userName }) {
     }, [messages])
 
     useEffect(() => {
-        async function fetchData() {
-            const response = await getMessages()
-            setMessages(response)
-        }
-        fetchData();
         // Establish WebSocket connection
         const socket = socketIOClient(ENDPOINT)
-        // Listen for new messages
-        socket.on("newMessage", (newMessage) => {
-            setMessages((prevMessages) => [...prevMessages, newMessage])
+
+        // Join the room with the current username
+        socket.emit("joinRoom", { username: userName })
+
+        // Listen for new private messages
+        socket.on("newPrivateMessage", (message) => {
+            setMessages((prevMessages) => [...prevMessages, message])
         })
 
         return () => socket.disconnect()
-    }, []);
+    }, [userName]);
 
-    const getMessages = async () => {
-        try {
-            const response = await fetch(ENDPOINT + 'messages')
-            return response.json()
-
-        } catch (error) {
-            console.error('Error fetching messages:', error)
-            return error
+    useEffect(() => {
+        if (userName) {
+            async function fetchData() {
+                const query = new URLSearchParams({ userName, user }).toString();
+                const url = `${ENDPOINT}messages?${query}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                setMessages(data);
+            }
+            fetchData();
         }
-    }
+    }, [userName, user]);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+
+        const socket = socketIOClient(ENDPOINT)
+
+        // Emit the private message
+        socket.emit("privateMessage", {
+            content: text,
+            sender: userName,
+            recipient: user
+        })
 
         try {
             const response = await fetch(ENDPOINT + 'messages', {
@@ -55,7 +69,7 @@ function Messages({ token, userName }) {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ content: text })
+                body: JSON.stringify({ content: text, recipientUsername: user })
             })
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -77,7 +91,7 @@ function Messages({ token, userName }) {
 
     return (
         <div className="messages-container">
-            <h2 className="sticky-header messages-title">All Messages</h2>
+            <h2 className="sticky-header messages-title">Chat with {user}</h2>
             <div className="main-content">
                 {messages.length > 0 ? (
                     <ul className="message-list">
@@ -104,4 +118,4 @@ function Messages({ token, userName }) {
     );
 }
 
-export default Messages;
+export default ChatComponent;
