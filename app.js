@@ -114,16 +114,17 @@ app.post('/login', async (req, res) => {
 });
 /*
 TODO
-requirements - group chat
-ui shows chat
-if user is not logged in then have a link that says "register or log in to join the chat" otherwise show the chat form
-have register & login pages, both redirect to chat
-make sure the chat shows the correct poster of the new message
-have a log out 
-have the header say home, login/register or logout
+requirements - 
+x group chat 
+x ui shows chat 
+x if user is not logged in then have a link that says "register or log in to join the chat" otherwise show the chat form
+x have register & login pages, both redirect to chat
+x make sure the chat shows the correct poster of the new message
+x have a log out 
+x have the header say home, login/register or logout
 
-add login api & page
-register api & page
+x add login api & page
+x register api & page
 
 requirements - individual chat
 group chat shows all of the users
