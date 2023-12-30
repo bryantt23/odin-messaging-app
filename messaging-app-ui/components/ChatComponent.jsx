@@ -30,7 +30,13 @@ function ChatComponent({ token, userName }) {
 
         // Listen for new private messages
         socket.on("newPrivateMessage", (message) => {
-            setMessages((prevMessages) => [...prevMessages, message])
+            console.log("🚀 ~ file: ChatComponent.jsx:33 ~ socket.on ~ message:", message)
+            const formattedMessage = {
+                ...message,
+                // Assuming the server sends the sender's username as 'sender'
+                username: message.sender
+            };
+            setMessages((prevMessages) => [...prevMessages, formattedMessage]);
         })
 
         return () => socket.disconnect()

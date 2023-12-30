@@ -48,6 +48,12 @@ io.on('connection', socket => {
       sender,
       recipient
     });
+    // Emit to the sender
+    io.to(sender).emit('newPrivateMessage', {
+      content,
+      sender,
+      recipient
+    });
   });
 
   socket.on('disconnect', () => {
