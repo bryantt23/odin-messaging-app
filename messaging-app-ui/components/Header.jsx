@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 
-function Header() {
-    const [token, setToken] = useState(localStorage.getItem('jwt'));
-
+function Header({ token, setToken }) {
     const signOut = () => {
         localStorage.removeItem('jwt');
         setToken(null); // Update the token state to null on sign out
@@ -16,20 +14,6 @@ function Header() {
     ) : (
         <Link to="/login">Login</Link>
     );
-
-    useEffect(() => {
-        // Update token state whenever localStorage changes
-        const handleStorageChange = () => {
-            setToken(localStorage.getItem('jwt'));
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        // Clean up the listener
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-        };
-    }, []);
 
     return (
         <header className="header">

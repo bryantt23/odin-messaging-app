@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function Login({ setToken }) {
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -13,6 +13,7 @@ function Login() {
         try {
             const response = await axios.post('http://localhost:3000/login', { name, password });
             localStorage.setItem("jwt", response.data.token);
+            setToken(response.data.token)
             navigate('/');
         } catch (error) {
             if (error.response && error.response.status === 401) {
