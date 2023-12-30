@@ -1,4 +1,4 @@
-async function fetchMessages(endpoint, queryParams = {}) {
+export async function fetchMessages(endpoint, queryParams = {}) {
   const query = new URLSearchParams(queryParams).toString();
   const url = `${endpoint}messages?${query}`;
   try {
@@ -13,4 +13,31 @@ async function fetchMessages(endpoint, queryParams = {}) {
   }
 }
 
-export default fetchMessages;
+export function scrollToBottom(ref) {
+  ref.current?.scrollIntoView({ behavior: 'smooth' });
+}
+
+export async function sendMessage(
+  endpoint,
+  token,
+  messageContent,
+  recipientUsername = null
+) {
+  try {
+    const response = await fetch(`${endpoint}messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ content: messageContent, recipientUsername })
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return true;
+  } catch (error) {
+    console.error('Error sending message:', error);
+    return false;
+  }
+}

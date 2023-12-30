@@ -3,7 +3,7 @@ import socketIOClient from 'socket.io-client'
 import './ChatComponent.css'
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import fetchMessages from './utils';
+import { fetchMessages, scrollToBottom, sendMessage } from './utils';
 
 const ENDPOINT = 'http://localhost:3000/'
 
@@ -13,12 +13,8 @@ function ChatComponent({ token, userName }) {
     const messagesEndRef = useRef(null)
     const { user } = useParams()
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
-
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom(messagesEndRef)
     }, [messages])
 
     useEffect(() => {
@@ -62,21 +58,9 @@ function ChatComponent({ token, userName }) {
             recipient: user
         })
 
-        try {
-            const response = await fetch(ENDPOINT + 'messages', {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ content: text, recipientUsername: user })
-            })
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            setText("")
-        } catch (error) {
-            console.error('Error sending message:', error);
+        const success = await sendMessage(ENDPOINT, token, text, user);
+        if (success) {
+            setText("");
         }
     }
 
@@ -97,13 +81,7 @@ function ChatComponent({ token, userName }) {
                     <ul className="message-list">
                         {messages.map(message => (
                             <li key={message._id} className="message-item">
-                                {message.username === userName ? (
-                                    // If the message username is the current user, display as plain text
-                                    <span className="message-title">{message.username}</span>
-                                ) : (
-                                    // Otherwise, display as a hyperlink
-                                    <a href={`chat-with/${message.username}`} className="message-title">{message.username}</a>
-                                )}
+                                <span className="message-title">{message.username}</span>
                                 <p className="message-body">{message.content}</p>
                             </li>
                         ))}

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import socketIOClient from 'socket.io-client'
 import './Messages.css'
 import { Link } from 'react-router-dom';
-import fetchMessages from './utils';
+import { fetchMessages, scrollToBottom, sendMessage } from './utils';
 
 const ENDPOINT = 'http://localhost:3000/'
 
@@ -11,12 +11,8 @@ function Messages({ token, userName }) {
     const [text, setText] = useState("");
     const messagesEndRef = useRef(null)
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
-
     useEffect(() => {
-        scrollToBottom()
+        scrollToBottom(messagesEndRef)
     }, [messages])
 
     useEffect(() => {
@@ -37,22 +33,9 @@ function Messages({ token, userName }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-
-        try {
-            const response = await fetch(ENDPOINT + 'messages', {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ content: text })
-            })
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            setText("")
-        } catch (error) {
-            console.error('Error sending message:', error);
+        const success = await sendMessage(ENDPOINT, token, text);
+        if (success) {
+            setText("");
         }
     }
 
