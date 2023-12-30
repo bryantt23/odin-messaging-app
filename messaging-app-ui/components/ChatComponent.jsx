@@ -7,7 +7,6 @@ import { useParams } from 'react-router-dom';
 const ENDPOINT = 'http://localhost:3000/'
 
 function ChatComponent({ token, userName }) {
-    console.log("🚀 ~ file: ChatComponent.jsx:10 ~ ChatComponent ~ userName:", userName)
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     const messagesEndRef = useRef(null)
@@ -26,17 +25,21 @@ function ChatComponent({ token, userName }) {
         const socket = socketIOClient(ENDPOINT)
 
         // Join the room with the current username
-        socket.emit("joinRoom", { username: userName })
+        socket.emit("joinPrivateRoom", { username: userName })
+        console.log(`Joined private room for: ${userName}`);
 
         // Listen for new private messages
         socket.on("newPrivateMessage", (message) => {
             console.log("🚀 ~ file: ChatComponent.jsx:33 ~ socket.on ~ message:", message)
             const formattedMessage = {
-                ...message,
+                content: message.content,
                 // Assuming the server sends the sender's username as 'sender'
                 username: message.sender
             };
-            setMessages((prevMessages) => [...prevMessages, formattedMessage]);
+            console.log("🚀 ~ file: ChatComponent.jsx:39 ~ socket.on ~ formattedMessage:", formattedMessage)
+            if (formattedMessage.username) {
+                setMessages((prevMessages) => [...prevMessages, formattedMessage]);
+            }
         })
 
         return () => socket.disconnect()

@@ -27,7 +27,8 @@ function Messages({ token, userName }) {
         // Establish WebSocket connection
         const socket = socketIOClient(ENDPOINT)
         // Listen for new messages
-        socket.on("newMessage", (newMessage) => {
+        socket.on("newGroupMessage", (newMessage) => {
+            console.log("New group message received:", newMessage);
             setMessages((prevMessages) => [...prevMessages, newMessage])
         })
 

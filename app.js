@@ -33,27 +33,37 @@ const io = socketIo(server, {
 
 io.on('connection', socket => {
   console.log('A user connected');
+  // Join the user to the group chat room
+  socket.join('groupChatRoom');
 
   // Join the user to a room with their username
-  socket.on('joinRoom', ({ username }) => {
+  socket.on('joinPrivateRoom', ({ username }) => {
+    console.log(`User joined private room: ${username}`);
     socket.join(username);
+  });
+
+  // Handle group chat messages
+  socket.on('groupMessage', message => {
+    // Save message to database if needed
+    console.log('Group message received:', message);
+    io.to('groupChatRoom').emit('newGroupMessage', message);
   });
 
   // Handle private messages
   socket.on('privateMessage', ({ content, sender, recipient }) => {
     // Save the message to the database, similar to your POST /messages route logic
     // Emit the message to the recipient's room
-    io.to(recipient).emit('newPrivateMessage', {
+    const privateMessage = { content, sender, recipient };
+    console.log(
+      '🚀 ~ file: app.js:58 ~ socket.on ~ content, sender, recipient :',
       content,
       sender,
       recipient
-    });
+    );
+
+    io.to(recipient).emit('newPrivateMessage', privateMessage);
     // Emit to the sender
-    io.to(sender).emit('newPrivateMessage', {
-      content,
-      sender,
-      recipient
-    });
+    io.to(sender).emit('newPrivateMessage', privateMessage);
   });
 
   socket.on('disconnect', () => {
@@ -147,8 +157,19 @@ app.post('/messages', async (req, res) => {
 
     await newMessage.save();
     const messageObject = newMessage.toObject();
-    // Emit the new message to all connected clients
-    io.emit('newMessage', { ...messageObject, username: user.name });
+
+    // Check if it's a group message or a private message
+    if (!recipientId) {
+      // Group message: Emit to group chat room
+      io.to('groupChatRoom').emit('newGroupMessage', messageObject);
+    } else {
+      // Private message: Emit to both the sender and recipient
+      io.to(user.name).emit('newPrivateMessage', messageObject);
+      io.to(req.body.recipientUsername).emit(
+        'newPrivateMessage',
+        messageObject
+      );
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {
